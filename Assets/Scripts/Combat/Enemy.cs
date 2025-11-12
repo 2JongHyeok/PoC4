@@ -24,6 +24,7 @@ namespace Poc4.Combat
         private Vector3 initialPosition;
         private Rigidbody2D rb;
         private Coroutine attackCoroutine;
+        private Coroutine regenerationCoroutine;
         private float leashRadius;
 
         public event System.Action<float, float> OnHealthChanged; // currentHealth, maxHealth
@@ -117,7 +118,17 @@ namespace Poc4.Combat
         {
             if (currentState == newState) return;
 
-            // Exit logic for the old state
+            // --- EXIT LOGIC for old state ---
+            // Stop any pending health regeneration when leaving Idle state
+            if (currentState == EnemyState.Idle)
+            {
+                if (regenerationCoroutine != null)
+                {
+                    StopCoroutine(regenerationCoroutine);
+                    regenerationCoroutine = null;
+                }
+            }
+            // Stop attacking when leaving Attacking state
             if (currentState == EnemyState.Attacking)
             {
                 if (attackCoroutine != null) StopCoroutine(attackCoroutine);
@@ -126,7 +137,7 @@ namespace Poc4.Combat
             currentState = newState;
             Debug.Log($"{enemyData.enemyName} entering state: {newState}");
 
-            // Enter logic for the new state
+            // --- ENTER LOGIC for new state ---
             if (newState == EnemyState.Attacking)
             {
                 attackCoroutine = StartCoroutine(AttackLoop());
@@ -140,7 +151,23 @@ namespace Poc4.Combat
             {
                 bodyCollider.enabled = true;
                 attackRangeCollider.enabled = true;
+                // Start health regeneration process if not at full health
+                if (currentHealth < enemyData.maxHealth)
+                {
+                    regenerationCoroutine = StartCoroutine(RegenerateHealthAfterDelay());
+                }
             }
+        }
+
+        private IEnumerator RegenerateHealthAfterDelay()
+        {
+            Debug.Log($"{enemyData.enemyName} will regenerate health in 5 seconds.");
+            yield return new WaitForSeconds(5f);
+
+            Debug.Log($"{enemyData.enemyName} has regenerated to full health.");
+            currentHealth = enemyData.maxHealth;
+            OnHealthChanged?.Invoke(currentHealth, enemyData.maxHealth);
+            regenerationCoroutine = null;
         }
 
         private void UpdateIdleState()

@@ -14,30 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spellName: FireSphere
   icon: {fileID: 0}
-  castingTimes:
-  - 3
-  - 5
-  - 15
-  - 20
-  - 35
-  spellEffect: {fileID: 11400000, guid: 05f91144acb7cda4d80b64460b2fc476, type: 2}
-  damages:
-  - 5
-  - 10
-  - 15
-  - 20
-  - 25
-  aoeRadiuses:
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  projectileScales:
-  - 1
-  - 1
-  - 1
-  - 1
-  - 1
-  projectileCounts: 0a00000002000000040000000800000010000000
+  requiredCircle: 1
+  castingTime: 2
+  cooldown: 5
+  damage: 4
+  aoeRadius: 0
+  projectileScale: 1
+  projectileCount: 1
   projectilePrefab: {fileID: 1981439560472969193, guid: e2e40ee0c50f0aa4fa72f7b0fd0b44ad, type: 3}

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Poc4.Spells;
 
 public class PlayerController : MonoBehaviour
 {
@@ -41,15 +42,18 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        // If input is locked (e.g., at the start of a cast), ignore all inputs
-        if (spellCastingSystem.IsInputLocked)
+        // The IsCasting flag now prevents most actions
+        if (spellCastingSystem.IsCasting)
         {
-            moveInput = Vector2.zero; // Ensure no movement input is processed
-            return;
+            moveInput = Vector2.zero; // Ensure no movement input is processed while casting
+        }
+        else
+        {
+            // Only handle selection and movement if not casting
+            HandleSpellSelection();
+            HandleMovementInput();
         }
 
-        HandleSpellSelection();
-        HandleMovementInput();
         HandleCastingInput();
 
         // Interrupt casting if player moves while casting
@@ -98,22 +102,14 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0)) // Left-click
         {
-            if (spellCastingSystem.IsCasting)
+            if (currentSelectedSpell != null)
             {
-                // If already casting, fire the spell
-                spellCastingSystem.FireSpell();
+                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                spellCastingSystem.AttemptToCast(currentSelectedSpell, mousePos);
             }
             else
             {
-                // If not casting, start casting the selected spell
-                if (currentSelectedSpell != null)
-                {
-                    spellCastingSystem.StartCasting(currentSelectedSpell);
-                }
-                else
-                {
-                    Debug.LogWarning("No spell selected to cast.");
-                }
+                Debug.LogWarning("No spell selected to cast.");
             }
         }
     }

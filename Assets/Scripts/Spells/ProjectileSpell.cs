@@ -1,7 +1,5 @@
 using UnityEngine;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using Poc4.Combat;
 
 namespace Poc4.Spells
@@ -14,45 +12,40 @@ namespace Poc4.Spells
         [SerializeField] private LayerMask hitLayer; // Layers the projectile can hit
 
         private SpellData spellData;
-        private int circleCount;
         private Vector2 direction;
         private float currentLifetime;
-        private bool hasExploded = false;
+        private bool hasBeenUsed = false; // Prevents multiple triggers
 
-        public void Initialize(SpellData data, int circles, Vector2 targetWorldPosition)
+        public void Initialize(SpellData data, Vector2 targetWorldPosition)
         {
             spellData = data;
-            circleCount = circles;
-            direction = (targetWorldPosition - (Vector2)transform.position).normalized; // Calculate direction from spawn to target
+            direction = (targetWorldPosition - (Vector2)transform.position).normalized;
             currentLifetime = lifetime;
-            hasExploded = false;
+            hasBeenUsed = false;
             transform.rotation = Quaternion.identity;
 
-            // Apply projectile scale based on circle count as a multiplier to the prefab's base scale
-            int circleIndex = circleCount - 1;
-            if (spellData.projectileScales != null && circleIndex < spellData.projectileScales.Length)
+            // Apply projectile scale as a multiplier to the prefab's base scale
+            if (spellData.projectileScale != 1f) // Optimization: only change if not default
             {
-                float scaleMultiplier = spellData.projectileScales[circleIndex];
-                Vector3 baseScale = transform.localScale; // Get the prefab's base scale
-                transform.localScale = baseScale * scaleMultiplier;
+                transform.localScale *= spellData.projectileScale;
             }
         }
 
         private void Update()
         {
-            if (hasExploded) return;
+            if (hasBeenUsed) return;
 
             currentLifetime -= Time.deltaTime;
             if (currentLifetime <= 0)
             {
-                // If it's a single-target spell (explosionRadius 0), just destroy it on lifetime expiry
-                if (spellData?.spellEffect is DamageSpellEffect damageEffect && damageEffect.explosionRadius == 0)
-                {
-                    Destroy(gameObject);
-                }
-                else // Otherwise, explode
+                // If it's an AoE spell, explode on lifetime expiry. Otherwise, just disappear.
+                if (spellData.aoeRadius > 0)
                 {
                     Explode();
+                }
+                else
+                {
+                    Destroy(gameObject);
                 }
                 return;
             }
@@ -62,19 +55,20 @@ namespace Poc4.Spells
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (hasExploded) return;
+            if (hasBeenUsed) return;
 
             // Check if the collided object is in the hitLayer
             if (((1 << other.gameObject.layer) & hitLayer) != 0)
             {
-                // If it's a single-target spell (explosionRadius 0), apply damage directly
-                if (spellData?.spellEffect is DamageSpellEffect damageEffect && damageEffect.explosionRadius == 0)
+                // If it's a single-target spell, apply damage directly
+                if (spellData.aoeRadius <= 0)
                 {
+                    hasBeenUsed = true;
                     Debug.Log($"'{spellData.spellName}' hit single target {other.gameObject.name}.");
-                    damageEffect.ApplyEffect(other.gameObject, spellData, circleCount);
+                    ApplyDamage(other.gameObject);
                     Destroy(gameObject);
                 }
-                else // Otherwise, explode
+                else // Otherwise, it's an AoE spell, so explode on impact
                 {
                     Explode();
                 }
@@ -83,65 +77,44 @@ namespace Poc4.Spells
 
         private void Explode()
         {
-            if (hasExploded) return;
-            hasExploded = true;
+            if (hasBeenUsed) return;
+            hasBeenUsed = true;
 
             Debug.Log($"'{spellData.spellName}' exploding at {transform.position}");
 
-            if (spellData?.spellEffect is DamageSpellEffect damageEffect)
+            // Find all colliders within the explosion radius
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, spellData.aoeRadius, hitLayer);
+            
+            // Use a HashSet to damage each unique enemy only once
+            HashSet<IDamageable> damagedTargets = new HashSet<IDamageable>();
+            foreach (var hit in hits)
             {
-                int circleIndex = circleCount - 1;
-
-                // Get AoE radius for the current circle, with a fallback to the effect's default radius
-                float radius = damageEffect.explosionRadius;
-                if (spellData.aoeRadiuses != null && circleIndex < spellData.aoeRadiuses.Length)
+                IDamageable damageable = hit.GetComponentInParent<IDamageable>();
+                if (damageable != null)
                 {
-                    radius = spellData.aoeRadiuses[circleIndex];
-                }
-
-                // Instantiate and initialize visual effect
-                if (damageEffect.explosionVisualPrefab != null)
-                {
-                    GameObject visualizerObject = Instantiate(damageEffect.explosionVisualPrefab, transform.position, Quaternion.identity);
-                    AoEVisualizer visualizer = visualizerObject.GetComponent<AoEVisualizer>();
-                    if (visualizer != null)
-                    {
-                        visualizer.Initialize(radius);
-                    }
-                }
-
-                // Find all colliders within the explosion radius
-                Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, radius, hitLayer);
-                
-                // Use a HashSet to damage each unique enemy only once
-                HashSet<IDamageable> damagedTargets = new HashSet<IDamageable>();
-                foreach (var hit in hits)
-                {
-                    IDamageable damageable = hit.GetComponentInParent<IDamageable>();
-                    if (damageable != null)
-                    {
-                        damagedTargets.Add(damageable);
-                    }
-                }
-
-                // Apply damage to all unique targets found
-                foreach (IDamageable target in damagedTargets)
-                {
-                    Component targetComponent = (Component)target;
-                    damageEffect.ApplyEffect(targetComponent.gameObject, spellData, circleCount);
+                    damagedTargets.Add(damageable);
                 }
             }
-            else
+
+            // Apply damage to all unique targets found
+            foreach (IDamageable target in damagedTargets)
             {
-                Debug.LogWarning($"Spell '{spellData.spellName}' has no DamageSpellEffect with AoE data.");
+                target.TakeDamage(spellData.damage);
             }
+
+            // For now, we don't have a visual prefab in the new simple SpellData.
+            // This can be re-added later if needed.
 
             Destroy(gameObject);
         }
 
-        // --- Usage in Unity ---
-        // 1. This script is attached to a projectile prefab.
-        // 2. The projectile explodes on contact with an object on the 'Hit Layer' or when its lifetime expires.
-        // 3. The explosion damage and radius are defined in the 'DamageSpellEffect' asset, which is referenced by the 'SpellData' asset.
+        private void ApplyDamage(GameObject target)
+        {
+            IDamageable damageable = target.GetComponentInParent<IDamageable>();
+            if (damageable != null)
+            {
+                damageable.TakeDamage(spellData.damage);
+            }
+        }
     }
 }

@@ -15,18 +15,16 @@ namespace Poc4.Player
         [SerializeField] private int currentXP = 0;
         [SerializeField] private int xpToNextLevel = 100;
 
-        [Header("Casting Time Scaling")]
-        [Tooltip("The casting time multiplier at level 1. Should be 1.")]
-        [SerializeField] private float initialCastingMultiplier = 1.0f;
-        [Tooltip("How much the multiplier decreases per level. E.g., 0.05 means 5% faster casting per level.")]
-        [SerializeField] private float castingMultiplierReductionPerLevel = 0.05f;
+        [Header("Circle Level")]
+        [SerializeField] private int initialCircleLevel = 1;
+        public int PlayerCircleLevel { get; private set; }
 
         public int Level => level;
-        public float CastingTimeMultiplier { get; private set; }
 
         public event Action<int> OnLevelUp;
         public event Action<int, int> OnXPChanged;
         public event Action<float, float> OnHealthChanged;
+        public event Action<int> OnPlayerCircleLevelChanged;
 
         public static PlayerStats Instance { get; private set; }
 
@@ -41,10 +39,13 @@ namespace Poc4.Player
             Instance = this;
 
             currentHealth = maxHealth;
-            CalculateCastingMultiplier();
+            PlayerCircleLevel = initialCircleLevel;
+            
+            // Initial UI updates
             OnLevelUp?.Invoke(level);
             OnXPChanged?.Invoke(currentXP, xpToNextLevel);
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
+            OnPlayerCircleLevelChanged?.Invoke(PlayerCircleLevel);
         }
 
         // Temporary method for testing
@@ -54,6 +55,17 @@ namespace Poc4.Player
             {
                 AddExperience(25);
             }
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                IncreasePlayerCircleLevel();
+            }
+        }
+
+        public void IncreasePlayerCircleLevel()
+        {
+            PlayerCircleLevel++;
+            Debug.Log($"Player Circle Level increased to {PlayerCircleLevel}");
+            OnPlayerCircleLevelChanged?.Invoke(PlayerCircleLevel);
         }
 
         public void AddExperience(int amount)
@@ -75,18 +87,8 @@ namespace Poc4.Player
             // Simple formula for next level's XP requirement
             xpToNextLevel = Mathf.RoundToInt(xpToNextLevel * 1.5f);
             
-            CalculateCastingMultiplier();
-
-            Debug.Log($"LEVEL UP! Reached level {level}. Casting time multiplier is now {CastingTimeMultiplier:P0}.");
+            Debug.Log($"LEVEL UP! Reached level {level}.");
             OnLevelUp?.Invoke(level);
-        }
-
-        private void CalculateCastingMultiplier()
-        {
-            // Multiplier decreases as level increases
-            CastingTimeMultiplier = initialCastingMultiplier - (castingMultiplierReductionPerLevel * (level - 1));
-            // Ensure the multiplier doesn't go below a certain threshold (e.g., 10% of original time)
-            CastingTimeMultiplier = Mathf.Max(0.1f, CastingTimeMultiplier);
         }
 
         public void TakeDamage(float amount)

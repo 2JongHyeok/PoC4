@@ -4,22 +4,26 @@ using Poc4.Spells; // Add this namespace
 [CreateAssetMenu(menuName = "Poc4/Spells/SpellData", fileName = "NewSpellData")] // Updated menu path
 public class SpellData : ScriptableObject
 {
+    [Header("Core Info")]
     public string spellName;
     public Sprite icon;
-    public float[] castingTimes; // e.g., [3, 5, 7, ...]
 
-    [Header("Spell Effects & Scaling")]
-    public SpellEffect spellEffect; // Reference to the base spell effect
-    public float[] damages; // Damage per circle level (index 0 = 1st circle)
+    [Header("Requirements & Timers")]
+    [Tooltip("The player's circle level must be >= this value to cast.")]
+    public int requiredCircle = 1;
+    [Tooltip("Time in seconds it takes to cast this spell.")]
+    public float castingTime = 1.5f;
+    [Tooltip("Time in seconds before this spell can be cast again.")]
+    public float cooldown = 5f;
 
-    [Tooltip("Optional: Area of Effect radius per circle. Used by explosion logic.")]
-    public float[] aoeRadiuses; 
-
-    [Tooltip("Optional: Scale of the projectile prefab per circle. 1 is default size.")]
-    public float[] projectileScales;
-
-    [Tooltip("Optional: Number of projectiles to fire per circle.")]
-    public int[] projectileCounts;
-
+    [Header("Spell Properties")]
+    public float damage = 10f;
+    [Tooltip("Set to 0 for single-target spells.")]
+    public float aoeRadius = 0f;
+    public float projectileScale = 1f;
+    public int projectileCount = 1;
+    
+    [Header("Prefab")]
     public GameObject projectilePrefab;
 }
+

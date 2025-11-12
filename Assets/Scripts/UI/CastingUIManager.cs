@@ -1,126 +1,102 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro; // Using TextMeshPro for better text rendering
+using TMPro;
+using Poc4.Spells;
 
-public class CastingUIManager : MonoBehaviour
+namespace Poc4.UI
 {
-    [Header("Dependencies")]
-    [SerializeField] private SpellCastingSystem spellCastingSystem;
-
-    [Header("UI Elements")]
-    [SerializeField] private GameObject castingUIParent; // The parent object containing all casting UI
-    [SerializeField] private RectTransform fillRect; // The RectTransform of the slider's "Fill" image
-    [SerializeField] private TextMeshProUGUI circleText; // Text to display "Circle X"
-
-    private void Start()
+    public class CastingUIManager : MonoBehaviour
     {
-        // Ensure SpellCastingSystem is assigned in the Inspector.
-        // If not assigned, a NullReferenceException will occur, indicating a setup error.
-        SubscribeToEvents();
-        
-        // Initially hide the UI
-        if (castingUIParent != null)
+        [Header("Dependencies")]
+        [SerializeField] private SpellCastingSystem spellCastingSystem;
+
+        [Header("UI Elements")]
+        [SerializeField] private GameObject castingUIParent; // The parent object containing all casting UI
+        [SerializeField] private RectTransform fillRect; // The RectTransform of the casting bar's "Fill" image
+
+        private void Start()
         {
-            castingUIParent.SetActive(false);
+            if (spellCastingSystem == null)
+            {
+                // Attempt to find it on the player if not assigned
+                spellCastingSystem = FindFirstObjectByType<SpellCastingSystem>();
+            }
+
+            SubscribeToEvents();
+            
+            if (castingUIParent != null)
+            {
+                castingUIParent.SetActive(false);
+            }
         }
-    }
 
-    private void OnDestroy()
-    {
-        UnsubscribeFromEvents();
-    }
-
-    private void SubscribeToEvents()
-    {
-        // Ensure spellCastingSystem is not null before subscribing
-        if (spellCastingSystem != null)
+        private void OnDestroy()
         {
-            spellCastingSystem.OnCastingStarted += HandleCastingStarted;
-            spellCastingSystem.OnCastingProgress += HandleCastingProgress;
-            spellCastingSystem.OnCircleCompleted += HandleCircleCompleted;
-            spellCastingSystem.OnCastingInterrupted += HandleCastingFinished;
-            spellCastingSystem.OnSpellFired += (firedCircle) => HandleCastingFinished();
+            UnsubscribeFromEvents();
         }
-        else
+
+        private void SubscribeToEvents()
         {
-            Debug.LogError("CastingUIManager: SpellCastingSystem is not assigned. Please assign it in the Inspector.", this);
-            this.enabled = false; // Disable this component if essential dependency is missing
+            if (spellCastingSystem != null)
+            {
+                spellCastingSystem.OnCastingStarted += HandleCastingStarted;
+                spellCastingSystem.OnCastingProgress += HandleCastingProgress;
+                spellCastingSystem.OnCastingFinished += HandleCastingFinished;
+            }
+            else
+            {
+                Debug.LogError("CastingUIManager: SpellCastingSystem could not be found. Please assign it in the Inspector.", this);
+                this.enabled = false;
+            }
         }
-    }
 
-    private void UnsubscribeFromEvents()
-    {
-        if (spellCastingSystem != null)
+        private void UnsubscribeFromEvents()
         {
-            spellCastingSystem.OnCastingStarted -= HandleCastingStarted;
-            spellCastingSystem.OnCastingProgress -= HandleCastingProgress;
-            spellCastingSystem.OnCircleCompleted -= HandleCircleCompleted;
-            spellCastingSystem.OnCastingInterrupted -= HandleCastingFinished;
-            spellCastingSystem.OnSpellFired -= (firedCircle) => HandleCastingFinished();
+            if (spellCastingSystem != null)
+            {
+                spellCastingSystem.OnCastingStarted -= HandleCastingStarted;
+                spellCastingSystem.OnCastingProgress -= HandleCastingProgress;
+                spellCastingSystem.OnCastingFinished -= HandleCastingFinished;
+            }
         }
-    }
 
-    private void HandleCastingStarted()
-    {
-        if (castingUIParent != null)
+        private void HandleCastingStarted()
         {
-            castingUIParent.SetActive(true);
+            if (castingUIParent != null)
+            {
+                castingUIParent.SetActive(true);
+            }
+            UpdateCastingBar(0, 1); // Reset bar at the beginning
         }
-        UpdateCircleText(0); // Show 0 for completed circles at the start
-        UpdateSlider(0, 1); // Reset slider at the beginning
-    }
 
-    private void HandleCastingProgress(int currentCircle, float currentCircleTime, float totalCircleTime)
-    {
-        UpdateSlider(currentCircleTime, totalCircleTime);
-    }
-
-    private void HandleCircleCompleted(int completedCircle)
-    {
-        // Show the number of the circle that was just completed
-        UpdateCircleText(completedCircle);
-        UpdateSlider(0, 1); // Reset for the next circle
-    }
-
-    private void HandleCastingFinished()
-    {
-        if (castingUIParent != null)
+        private void HandleCastingProgress(float currentTime, float totalTime)
         {
-            castingUIParent.SetActive(false);
+            UpdateCastingBar(currentTime, totalTime);
         }
-        UpdateSlider(0, 1);
-    }
 
-    private void UpdateCircleText(int circleNumber)
-    {
-        if (circleText != null)
+        private void HandleCastingFinished()
         {
-            circleText.text = $"{circleNumber}";
+            if (castingUIParent != null)
+            {
+                castingUIParent.SetActive(false);
+            }
         }
-    }
 
-    private void UpdateSlider(float currentValue, float maxValue)
-    {
-        if (fillRect != null)
+        private void UpdateCastingBar(float currentValue, float maxValue)
         {
-            float fillAmount = (maxValue > 0) ? currentValue / maxValue : 0;
-            fillRect.localScale = new Vector3(fillAmount, 1, 1);
+            if (fillRect != null)
+            {
+                float fillAmount = (maxValue > 0) ? currentValue / maxValue : 0;
+                fillRect.localScale = new Vector3(fillAmount, 1, 1);
+            }
         }
-    }
 
-    // --- Usage in Unity ---
-    // 1. Create a new empty GameObject in your scene and name it "UIManager".
-    // 2. Attach this CastingUIManager.cs script to the "UIManager" GameObject.
-    // 3. Create a Canvas in your scene (if you don't have one).
-    // 4. Inside the Canvas, create a UI structure:
-    //    - An empty GameObject named "CastingUIParent".
-    //    - Inside "CastingUIParent", add a "Slider" UI element.
-    //    - Inside "CastingUIParent", add a "Text - TextMeshPro" UI element.
-    // 5. In the "UIManager" GameObject's Inspector:
-    //    - IMPORTANT: Drag the "Player" GameObject (or wherever SpellCastingSystem is) to the 'Spell Casting System' field. This field MUST be assigned.
-    //    - Drag the "CastingUIParent" GameObject to the 'Casting UI Parent' field.
-    //    - In the Hierarchy, expand the "Slider" to find its "Fill Area" -> "Fill" child object. Drag the "Fill" object to the 'Fill Rect' field.
-    //    - Drag the "Text - TextMeshPro" to the 'Circle Text' field.
-    // 6. In the Hierarchy, select the "Fill" object and in its RectTransform, set the pivot to (0, 0.5). This makes it scale from the left.
-    // 7. Ensure the scene is running to test the UI updates during casting.
+        // --- Usage in Unity ---
+        // 1. Attach this script to your "UIManager" GameObject.
+        // 2. In the Inspector, assign the SpellCastingSystem component.
+        // 3. Create a UI for the casting bar (e.g., a background Image with a child "Fill" Image).
+        // 4. Assign the parent GameObject of the bar to 'Casting UI Parent'.
+        // 5. Assign the "Fill" Image's RectTransform to the 'Fill Rect' field.
+        // 6. Ensure the "Fill" RectTransform's pivot is set to (0, 0.5).
+    }
 }
+

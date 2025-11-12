@@ -59,6 +59,7 @@
                     "interactions": "",
                     "initialStateCheck": false
                 },
+
                 {
                     "name": "Previous",
                     "type": "Button",
@@ -407,6 +408,7 @@
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
+
                 {
                     "name": "",
                     "id": "1534dc16-a6aa-499d-9c3a-22b47347b52a",

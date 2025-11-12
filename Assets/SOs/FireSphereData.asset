@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c9ac6168a12e28458f82895e8e2170b, type: 3}
+  m_Name: FireSphereData
+  m_EditorClassIdentifier: 
+  spellName: FireSphere
+  icon: {fileID: 0}
+  castingTimes:
+  - 3
+  - 5
+  - 15
+  - 20
+  - 35
+  spellEffect: {fileID: 11400000, guid: 05f91144acb7cda4d80b64460b2fc476, type: 2}
+  damages:
+  - 5
+  - 10
+  - 15
+  - 20
+  - 25
+  aoeRadiuses:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  projectileScales:
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+  projectileCounts: 0a00000002000000040000000800000010000000
+  projectilePrefab: {fileID: 1981439560472969193, guid: e2e40ee0c50f0aa4fa72f7b0fd0b44ad, type: 3}

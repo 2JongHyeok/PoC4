@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: Bear
   maxHealth: 20
-  moveSpeed: 4
-  attackPower: 10
-  attackSpeed: 0.2
+  moveSpeed: 5
+  attackPower: 2
+  attackSpeed: 1
   attackRange: 4
-  perceptionRange: 15
+  perceptionRange: 10
   xpValue: 10
   sprite: {fileID: 0}

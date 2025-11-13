@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using Poc4.Spells;
 
 public class PlayerController : MonoBehaviour
@@ -14,6 +15,9 @@ public class PlayerController : MonoBehaviour
     private Vector2 moveInput;
     private bool isMoving = false;
     private SpellData currentSelectedSpell;
+
+    public event Action<SpellData> OnSpellSelected;
+    public SpellData CurrentSelectedSpell => currentSelectedSpell;
 
     public SpellData[] GetAssignedSpells()
     {
@@ -42,6 +46,7 @@ public class PlayerController : MonoBehaviour
         {
             currentSelectedSpell = assignedSpells[0];
             Debug.Log($"Spell '{currentSelectedSpell.spellName}' selected by default.");
+            OnSpellSelected?.Invoke(currentSelectedSpell); // Invoke for initial selection
         }
     }
 
@@ -92,6 +97,7 @@ public class PlayerController : MonoBehaviour
         // Select the new spell.
         currentSelectedSpell = assignedSpells[index];
         Debug.Log($"Spell '{currentSelectedSpell.spellName}' selected with key {index + 1}.");
+        OnSpellSelected?.Invoke(currentSelectedSpell); // Invoke event after selection
     }
 
     private void HandleMovementInput()

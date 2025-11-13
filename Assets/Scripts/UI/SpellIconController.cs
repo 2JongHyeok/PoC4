@@ -10,6 +10,7 @@ namespace Poc4.UI
         [SerializeField] private Image iconImage;
         [SerializeField] private Image cooldownOverlay; // Black, semi-transparent image for cooldown wipe
         [SerializeField] private Image unavailableOverlay; // Red, semi-transparent image for level requirement
+        [SerializeField] private GameObject selectionHighlight; // Image behind the icon to show selection
 
         private SpellData assignedSpell;
         private float cooldownEndTime;
@@ -29,6 +30,7 @@ namespace Poc4.UI
             {
                 iconImage.enabled = false;
             }
+            SetHighlight(false); // Ensure highlight is off initially
         }
 
         public void UpdateState(bool canCast, bool isCastingOther, bool hasEnoughMana)
@@ -69,6 +71,14 @@ namespace Poc4.UI
         {
             cooldownDuration = duration;
             cooldownEndTime = Time.time + duration;
+        }
+
+        public void SetHighlight(bool active)
+        {
+            if (selectionHighlight != null)
+            {
+                selectionHighlight.SetActive(active);
+            }
         }
     }
 }

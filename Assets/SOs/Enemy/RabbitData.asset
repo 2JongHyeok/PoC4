@@ -18,6 +18,6 @@ MonoBehaviour:
   attackPower: 1
   attackSpeed: 0.5
   attackRange: 2
-  perceptionRange: 15
+  perceptionRange: 10
   xpValue: 10
   sprite: {fileID: 0}

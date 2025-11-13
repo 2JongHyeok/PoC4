@@ -15,6 +15,8 @@ namespace Poc4.UI
         [Header("UI Setup")]
         [SerializeField] private List<SpellIconController> spellIcons;
 
+        private SpellIconController currentSelectedIcon;
+
         private void Start()
         {
             // Find dependencies if not assigned
@@ -24,6 +26,12 @@ namespace Poc4.UI
 
             InitializeIcons();
             SubscribeToEvents();
+
+            // Set initial highlight if a spell is already selected
+            if (playerController.CurrentSelectedSpell != null)
+            {
+                HandleSpellSelected(playerController.CurrentSelectedSpell);
+            }
         }
 
         private void OnDestroy()
@@ -67,7 +75,10 @@ namespace Poc4.UI
             {
                 spellCastingSystem.OnCooldownStarted += HandleCooldownStarted;
             }
-            // No need to subscribe to PlayerCircleLevelChanged as Update() handles it every frame
+            if (playerController != null)
+            {
+                playerController.OnSpellSelected += HandleSpellSelected;
+            }
         }
 
         private void UnsubscribeFromEvents()
@@ -75,6 +86,10 @@ namespace Poc4.UI
             if (spellCastingSystem != null)
             {
                 spellCastingSystem.OnCooldownStarted -= HandleCooldownStarted;
+            }
+            if (playerController != null)
+            {
+                playerController.OnSpellSelected -= HandleSpellSelected;
             }
         }
 
@@ -86,6 +101,26 @@ namespace Poc4.UI
                 if (icon.AssignedSpell == spell)
                 {
                     icon.StartCooldown(duration);
+                    break;
+                }
+            }
+        }
+
+        private void HandleSpellSelected(SpellData spell)
+        {
+            // Deactivate previous highlight
+            if (currentSelectedIcon != null)
+            {
+                currentSelectedIcon.SetHighlight(false);
+            }
+
+            // Activate new highlight
+            foreach (var icon in spellIcons)
+            {
+                if (icon.AssignedSpell == spell)
+                {
+                    icon.SetHighlight(true);
+                    currentSelectedIcon = icon;
                     break;
                 }
             }

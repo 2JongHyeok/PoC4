@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FireBallData
   m_EditorClassIdentifier: 
   spellName: FireBall
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 19689f1bc47c4cf4ba54cd50f1f54d87, type: 3}
   requiredCircle: 1
   castingTime: 2
   cooldown: 5

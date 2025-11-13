@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FireSphereData
   m_EditorClassIdentifier: 
   spellName: FireSphere
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 2150985f96ff7f745963290d4a4961db, type: 3}
   requiredCircle: 2
   castingTime: 2
   cooldown: 5

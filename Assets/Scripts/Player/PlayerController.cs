@@ -47,24 +47,20 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        // The IsCasting flag now prevents most actions
         if (spellCastingSystem.IsCasting)
         {
-            moveInput = Vector2.zero; // Ensure no movement input is processed while casting
+            // While casting, check for a NEW movement key press to interrupt the cast.
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.D))
+            {
+                spellCastingSystem.InterruptCasting();
+            }
         }
         else
         {
-            // Only handle selection and movement if not casting
+            // If not casting, handle all normal inputs.
             HandleSpellSelection();
             HandleMovementInput();
-        }
-
-        HandleCastingInput();
-
-        // Interrupt casting if player moves while casting
-        if (spellCastingSystem.IsCasting && isMoving)
-        {
-            spellCastingSystem.InterruptCasting();
+            HandleCastingInput();
         }
     }
 
@@ -100,6 +96,7 @@ public class PlayerController : MonoBehaviour
     {
         moveInput.x = Input.GetAxisRaw("Horizontal");
         moveInput.y = Input.GetAxisRaw("Vertical");
+        // isMoving is no longer used for interruption, but can be kept for other purposes (e.g., animation)
         isMoving = moveInput.magnitude > 0.1f;
     }
 
@@ -109,6 +106,13 @@ public class PlayerController : MonoBehaviour
         {
             if (currentSelectedSpell != null)
             {
+                // Immediately stop movement when attempting to cast
+                if (rb != null)
+                {
+                    rb.linearVelocity = Vector2.zero;
+                }
+                moveInput = Vector2.zero;
+
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 spellCastingSystem.AttemptToCast(currentSelectedSpell, mousePos);
             }
@@ -133,7 +137,8 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            rb.linearVelocity = Vector2.zero; // Stop movement if casting
+            // This ensures player stays locked in place during cast time
+            rb.linearVelocity = Vector2.zero;
         }
     }
 

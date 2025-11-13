@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spellName: FireSphere
   icon: {fileID: 0}
-  requiredCircle: 1
+  requiredCircle: 2
   castingTime: 2
   cooldown: 5
   damage: 4

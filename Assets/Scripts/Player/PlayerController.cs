@@ -15,6 +15,11 @@ public class PlayerController : MonoBehaviour
     private bool isMoving = false;
     private SpellData currentSelectedSpell;
 
+    public SpellData[] GetAssignedSpells()
+    {
+        return assignedSpells;
+    }
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();

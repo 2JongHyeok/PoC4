@@ -15,6 +15,8 @@ public class SpellData : ScriptableObject
     public float castingTime = 1.5f;
     [Tooltip("Time in seconds before this spell can be cast again.")]
     public float cooldown = 5f;
+    [Tooltip("Mana required to cast this spell.")]
+    public float manaCost = 10f;
 
     [Header("Spell Properties")]
     public float damage = 10f;

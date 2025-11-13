@@ -31,16 +31,16 @@ namespace Poc4.UI
             }
         }
 
-        public void UpdateState(bool canCast, bool isCastingOther)
+        public void UpdateState(bool canCast, bool isCastingOther, bool hasEnoughMana)
         {
             if (assignedSpell == null) return;
 
             bool isOnCooldown = Time.time < cooldownEndTime;
             bool levelRequirementMet = Player.PlayerStats.Instance.PlayerCircleLevel >= assignedSpell.requiredCircle;
 
-            if (!levelRequirementMet)
+            if (!levelRequirementMet || !hasEnoughMana)
             {
-                // State 1: Circle Level Too Low
+                // State 1: Cannot Cast (Level or Mana)
                 iconImage.color = Color.white; // Normal icon color
                 cooldownOverlay.gameObject.SetActive(false);
                 unavailableOverlay.gameObject.SetActive(true);
@@ -60,7 +60,7 @@ namespace Poc4.UI
                 // State 3: Ready to Cast (or currently casting another spell)
                 unavailableOverlay.gameObject.SetActive(false);
                 cooldownOverlay.gameObject.SetActive(false);
-                // Dim the icon if player is busy casting something else
+                // Dim the icon if player is busy casting something else or another condition in CanCast fails
                 iconImage.color = (isCastingOther || !canCast) ? new Color(0.5f, 0.5f, 0.5f, 0.8f) : Color.white;
             }
         }

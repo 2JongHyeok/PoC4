@@ -36,12 +36,17 @@ namespace Poc4.Spells
             if (spell == null) return false;
             if (isCasting)
             {
-                Debug.Log("Cannot cast: Already casting another spell.");
+                // Already casting, so can't cast another.
                 return false;
             }
             if (playerStats.PlayerCircleLevel < spell.requiredCircle)
             {
                 Debug.Log($"Cannot cast: Player circle level ({playerStats.PlayerCircleLevel}) is too low for {spell.spellName} (requires {spell.requiredCircle}).");
+                return false;
+            }
+            if (playerStats.CurrentMana < spell.manaCost)
+            {
+                Debug.Log($"Cannot cast: Not enough mana for {spell.spellName}.");
                 return false;
             }
             if (spellCooldowns.TryGetValue(spell, out float cooldownEndTime) && Time.time < cooldownEndTime)
@@ -78,25 +83,33 @@ namespace Poc4.Spells
                 yield return null;
             }
 
-            // --- Fire Spell Logic ---
-            if (spell.projectilePrefab != null)
+            // Final check for mana right before casting, and consume it.
+            if (playerStats.UseMana(spell.manaCost))
             {
-                StartCoroutine(FireSequentialProjectiles(spell, spell.projectileCount, targetPosition));
+                // --- Fire Spell Logic ---
+                if (spell.projectilePrefab != null)
+                {
+                    StartCoroutine(FireSequentialProjectiles(spell, spell.projectileCount, targetPosition));
+                }
+                else
+                {
+                    Debug.LogWarning($"Spell {spell.spellName} has no projectile prefab assigned.");
+                }
+                // -----------------------
+                
+                // Set cooldown
+                spellCooldowns[spell] = Time.time + spell.cooldown;
+                OnCooldownStarted?.Invoke(spell, spell.cooldown);
+                Debug.Log($"{spell.spellName} cast successfully. Cooldown started.");
             }
             else
             {
-                Debug.LogWarning($"Spell {spell.spellName} has no projectile prefab assigned.");
+                Debug.LogWarning($"Failed to cast {spell.spellName}: Not enough mana at the last moment.");
             }
-            // -----------------------
-            
-            // Set cooldown
-            spellCooldowns[spell] = Time.time + spell.cooldown;
-            OnCooldownStarted?.Invoke(spell, spell.cooldown);
 
             isCasting = false;
             OnCastingFinished?.Invoke();
             castingCoroutine = null;
-            Debug.Log($"{spell.spellName} cast successfully. Cooldown started.");
         }
 
         private IEnumerator FireSequentialProjectiles(SpellData spell, int count, Vector2 targetPosition)

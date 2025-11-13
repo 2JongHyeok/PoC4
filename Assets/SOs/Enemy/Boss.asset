@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3fae584245a1b9747a07445d0e611c88, type: 3}
-  m_Name: RabbitData
+  m_Name: Boss
   m_EditorClassIdentifier: 
-  enemyName: Rabbit
-  maxHealth: 2
+  enemyName: Boss
+  maxHealth: 5000
   moveSpeed: 3
-  attackPower: 1
-  attackSpeed: 0.5
-  attackRange: 2
-  perceptionRange: 15
-  xpValue: 10
+  attackPower: 5
+  attackSpeed: 1
+  attackRange: 3
+  perceptionRange: 10
+  xpValue: 2000
   sprite: {fileID: 0}

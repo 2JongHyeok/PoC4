@@ -17,6 +17,7 @@ MonoBehaviour:
   requiredCircle: 1
   castingTime: 2
   cooldown: 5
+  manaCost: 1
   damage: 1
   aoeRadius: 3
   projectileScale: 1

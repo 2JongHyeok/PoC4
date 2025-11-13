@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Spell Casting")]
     [SerializeField] private SpellCastingSystem spellCastingSystem;
-    [SerializeField] private SpellData[] assignedSpells = new SpellData[4]; // Assign spells for keys 1-4 in the Inspector
+    [SerializeField] private SpellData[] assignedSpells = new SpellData[6]; // Assign spells for keys 1-6 in the Inspector
 
     private Rigidbody2D rb;
     private Vector2 moveInput;
@@ -70,6 +70,8 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha2)) SelectSpell(1);
         if (Input.GetKeyDown(KeyCode.Alpha3)) SelectSpell(2);
         if (Input.GetKeyDown(KeyCode.Alpha4)) SelectSpell(3);
+        if (Input.GetKeyDown(KeyCode.Alpha5)) SelectSpell(4);
+        if (Input.GetKeyDown(KeyCode.Alpha6)) SelectSpell(5);
     }
 
     private void SelectSpell(int index)

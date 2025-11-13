@@ -10,15 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7c9ac6168a12e28458f82895e8e2170b, type: 3}
-  m_Name: MeteoData
+  m_Name: SpeedFireBallData
   m_EditorClassIdentifier: 
-  spellName: Meteo
+  spellName: FireBall
   icon: {fileID: 21300000, guid: 19689f1bc47c4cf4ba54cd50f1f54d87, type: 3}
-  requiredCircle: 1
-  castingTime: 1.5
-  cooldown: 5
+  requiredCircle: 3
+  castingTime: 0.01
+  cooldown: 0
+  manaCost: 1
   damage: 10
-  aoeRadius: 0
+  aoeRadius: 3
   projectileScale: 1
   projectileCount: 1
-  projectilePrefab: {fileID: 7514338732379055249, guid: e37f834ffc007b94ab870c3abc86e64a, type: 3}
+  projectilePrefab: {fileID: 532213580185480456, guid: 78aa9b9a7d9743148b94b5a15bd23410, type: 3}

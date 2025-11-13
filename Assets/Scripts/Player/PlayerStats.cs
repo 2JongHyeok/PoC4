@@ -10,6 +10,10 @@ namespace Poc4.Player
         [SerializeField] private float maxHealth = 100f;
         private float currentHealth;
 
+        [Header("Mana")]
+        [SerializeField] private float maxMana = 100f;
+        private float currentMana;
+
         [Header("Level & Experience")]
         [SerializeField] private int level = 1;
         [SerializeField] private int currentXP = 0;
@@ -20,10 +24,12 @@ namespace Poc4.Player
         public int PlayerCircleLevel { get; private set; }
 
         public int Level => level;
+        public float CurrentMana => currentMana;
 
         public event Action<int> OnLevelUp;
         public event Action<int, int> OnXPChanged;
         public event Action<float, float> OnHealthChanged;
+        public event Action<float, float> OnManaChanged;
         public event Action<int> OnPlayerCircleLevelChanged;
 
         public static PlayerStats Instance { get; private set; }
@@ -39,26 +45,24 @@ namespace Poc4.Player
             Instance = this;
 
             currentHealth = maxHealth;
+            currentMana = maxMana;
             PlayerCircleLevel = initialCircleLevel;
             
             // Initial UI updates
             OnLevelUp?.Invoke(level);
             OnXPChanged?.Invoke(currentXP, xpToNextLevel);
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
+            OnManaChanged?.Invoke(currentMana, maxMana);
             OnPlayerCircleLevelChanged?.Invoke(PlayerCircleLevel);
         }
 
         // Temporary method for testing
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.X))
-            {
-                AddExperience(25);
-            }
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                IncreasePlayerCircleLevel();
-            }
+            if (Input.GetKeyDown(KeyCode.X)) AddExperience(25);
+            if (Input.GetKeyDown(KeyCode.C)) IncreasePlayerCircleLevel();
+            if (Input.GetKeyDown(KeyCode.P)) RestoreFullHealth(); // Debug: Restore Health
+            if (Input.GetKeyDown(KeyCode.O)) RestoreFullMana();   // Debug: Restore Mana
         }
 
         public void IncreasePlayerCircleLevel()
@@ -66,6 +70,31 @@ namespace Poc4.Player
             PlayerCircleLevel++;
             Debug.Log($"Player Circle Level increased to {PlayerCircleLevel}");
             OnPlayerCircleLevelChanged?.Invoke(PlayerCircleLevel);
+        }
+
+        public bool UseMana(float amount)
+        {
+            if (currentMana >= amount)
+            {
+                currentMana -= amount;
+                OnManaChanged?.Invoke(currentMana, maxMana);
+                return true;
+            }
+            return false; // Not enough mana
+        }
+
+        public void RestoreFullHealth()
+        {
+            currentHealth = maxHealth;
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+            Debug.Log("DEBUG: Health Restored.");
+        }
+
+        public void RestoreFullMana()
+        {
+            currentMana = maxMana;
+            OnManaChanged?.Invoke(currentMana, maxMana);
+            Debug.Log("DEBUG: Mana Restored.");
         }
 
         public void AddExperience(int amount)

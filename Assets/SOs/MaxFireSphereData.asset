@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7c9ac6168a12e28458f82895e8e2170b, type: 3}
-  m_Name: FireSphereData
+  m_Name: MaxFireSphereData
   m_EditorClassIdentifier: 
   spellName: FireSphere
   icon: {fileID: 21300000, guid: 2150985f96ff7f745963290d4a4961db, type: 3}
-  requiredCircle: 1
-  castingTime: 2
-  cooldown: 5
-  manaCost: 2
-  damage: 4
+  requiredCircle: 2
+  castingTime: 7
+  cooldown: 15
+  manaCost: 15
+  damage: 3000
   aoeRadius: 0
-  projectileScale: 1
+  projectileScale: 5
   projectileCount: 1
   projectilePrefab: {fileID: 1981439560472969193, guid: e2e40ee0c50f0aa4fa72f7b0fd0b44ad, type: 3}

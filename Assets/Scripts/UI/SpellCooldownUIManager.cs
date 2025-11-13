@@ -55,7 +55,8 @@ namespace Poc4.UI
                 if (icon.AssignedSpell != null)
                 {
                     bool canCast = spellCastingSystem.CanCast(icon.AssignedSpell);
-                    icon.UpdateState(canCast, spellCastingSystem.IsCasting);
+                    bool hasEnoughMana = playerStats.CurrentMana >= icon.AssignedSpell.manaCost;
+                    icon.UpdateState(canCast, spellCastingSystem.IsCasting, hasEnoughMana);
                 }
             }
         }
